@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: vidyasetu-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vidyasetu_dev
+      POSTGRES_DB: vidyasetu
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - vidyasetu_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vidyasetu-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/vidyasetu?TimeZone=UTC
+      DB_USERNAME: postgres
+      DB_PASSWORD: vidyasetu_dev
+      JWT_ACCESS_SECRET: dev-access-secret-change-in-prod-min-256bits-xxxxxxxxxx
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod-min-256bits-xxxxxxxxxx
+      COOKIE_SECURE: "false"
+      COOKIE_DOMAIN: localhost
+      WHATSAPP_ENABLED: "false"
+      FAST2SMS_ENABLED: "false"
+      SENTRY_DSN: ""
+      TZ: UTC
+      JAVA_TOOL_OPTIONS: "-Duser.timezone=UTC"
+    ports:
+      - "8081:8081"
+    restart: on-failure
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: vidyasetu-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@vidyasetu.in
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  vidyasetu_pgdata:

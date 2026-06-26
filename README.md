@@ -95,3 +95,9 @@ See [`backend/.env.example`](backend/.env.example) for the full list. Nothing is
 - All responses are wrapped in a shared `ApiResponse` envelope (`{ success, data, error }`).
 - Auth uses short-lived access tokens + long-lived refresh tokens, both in HTTP-only cookies.
 - A 401 on any request triggers the frontend's auth entry point, which redirects to login.
+
+---
+
+## License
+
+Licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
